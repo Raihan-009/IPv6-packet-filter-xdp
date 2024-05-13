@@ -1,4 +1,6 @@
 #include "../header/bpf_helpers.h"
+#include <arpa/inet.h>
+
 
 // Ethernet header
 struct ethhdr {
@@ -13,8 +15,10 @@ int parse_eth(struct ethhdr *eth, void *data_end, __u16 *eth_type)
     __u64 offset;
 
     offset = sizeof(*eth);
-    if ((void *)eth + offset > data_end)
+    if ((void *)eth + offset > data_end) {
+        // bpf_printk("Buffer overflow detected in parse_eth\n");
         return 0;
+    }
     *eth_type = eth->h_proto;
     return 1;
 }
@@ -32,12 +36,13 @@ int xdp_ipv6_filter_program(struct xdp_md *ctx)
         return XDP_PASS;
     }
 
-    // 0x86dd: IPv6 packets //
-    if (eth_type == (0x86dd)) {
+    // Check if the Ethernet type is IPv6
+    if (eth_type == ntohs(0x86dd)) {
         return XDP_PASS;
     } else {
         return XDP_DROP;
     }
 }
+
 
 char _license[] SEC("license") = "GPL";
