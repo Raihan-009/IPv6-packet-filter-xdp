@@ -1,47 +1,27 @@
 #include "../header/bpf_helpers.h"
 #include <arpa/inet.h>
+#include <linux/if_ether.h>
 
-
-// Ethernet header
-struct ethhdr {
-  __u8 h_dest[6];
-  __u8 h_source[6];
-  __u16 h_proto;
-} __attribute__((packed));
-
-
-int parse_eth(struct ethhdr *eth, void *data_end, __u16 *eth_type)
-{
-    __u64 offset;
-
-    offset = sizeof(*eth);
-    if ((void *)eth + offset > data_end) {
-        // bpf_printk("Buffer overflow detected in parse_eth\n");
-        return 0;
-    }
-    *eth_type = eth->h_proto;
-    return 1;
-}
 
 // XDP program //
-SEC("prog")
+SEC("xdp_drop")
 int xdp_ipv6_filter_program(struct xdp_md *ctx)
 {
     void *data_end = (void *)(long)ctx->data_end;
     void *data     = (void *)(long)ctx->data;
     struct ethhdr *eth = data;
-    
-    __u16 eth_type = 0;
-    if (!(parse_eth(eth, data_end, &eth_type))) {
-        return XDP_PASS;
-    }
+    __u16 h_proto;
+
+   if (data + sizeof(struct ethhdr) > data_end)
+        return XDP_DROP;
+
+    h_proto = eth->h_proto;
 
     // Check if the Ethernet type is IPv6
-    if (eth_type == ntohs(0x86dd)) {
-        return XDP_PASS;
-    } else {
+    if (h_proto == htons(ETH_P_IPV6))
         return XDP_DROP;
-    }
+
+    return XDP_PASS;
 }
 
 

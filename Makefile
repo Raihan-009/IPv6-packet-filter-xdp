@@ -9,10 +9,10 @@ build-bpf:
 	@ clang -O2 -target bpf -c bpf/xdp_filter.c -o bpf/xdp_filter.o
 
 load-bpf:
-	@ sudo ip link set dev veth-k xdp object bpf/xdp_filter.o
+	@ sudo ip link set dev veth-k xdpgeneric obj bpf/xdp_filter.o sec xdp_drop
 
 tcpdump-bpf:
-	@ sudo tcpdump -i veth-k
+	@ sudo tcpdump -i veth-k 
 
 exec-node:
 	@ sudo ip netns exec node bash
