@@ -2,7 +2,7 @@ pseudo-env:
 	@ chmod +x ./netns.sh
 	@ ./netns.sh
 
-test-env:
+test-connectivity:
 	@ sudo ip netns exec node ping -c 1 192.168.1.2
 
 build-bpf:
@@ -10,6 +10,9 @@ build-bpf:
 
 load-bpf:
 	@ sudo ip link set dev veth-k xdpgeneric obj bpf/xdp_filter.o sec xdp_drop
+
+get-ipv6:
+	@ ip -6 addr show dev veth-k | grep -oP '(?<=inet6 )[\da-f:]+' | head -n 1
 
 tcpdump-bpf:
 	@ sudo tcpdump -i veth-k 
