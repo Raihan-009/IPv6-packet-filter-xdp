@@ -17,7 +17,7 @@ int xdp_ipv6_filter_program(struct xdp_md *ctx)
 
     h_proto = eth->h_proto;
 
-    // Check if the Ethernet type is IPv6
+    // Check if the Ethernet type is IPv6 //
     if (h_proto == htons(ETH_P_IPV6))
         return XDP_DROP;
 
