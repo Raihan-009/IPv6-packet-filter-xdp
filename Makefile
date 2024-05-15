@@ -23,4 +23,3 @@ exec-node:
 clean:
 	@ sudo rm -rf bpf/xdp_filter.o
 	@ sudo ip netns delete node
-	@ sudo ip link delete dev veth-k
